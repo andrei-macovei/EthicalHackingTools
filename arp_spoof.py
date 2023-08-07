@@ -6,9 +6,10 @@ import sys
 
 # To enable IP forwarding for becoming MiM: echo 1 > /proc/sys/net/ipv4/ip_forward
 
+
 def get_mac(ip):
     arp_request = scapy.ARP(pdst=ip)
-    # Create a ethernet frame with broadcast MAC address as destination
+    # Create an ethernet frame with broadcast MAC address as destination
     broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
     arp_request_broadcast = broadcast/arp_request
 
