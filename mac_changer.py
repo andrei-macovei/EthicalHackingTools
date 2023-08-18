@@ -1,24 +1,37 @@
 #!/usr/bin/env python
 
 import subprocess
-import optparse
+import argparse
 import re
 
 
 def get_arguments():
-    parser = optparse.OptionParser()
+    parser = argparse.ArgumentParser(
+        prog='mac_changer',
+        description='Changes the MAC address of a specified network interface to a MAC address of your choice.',
+        epilog='Part of EthicalHackingTools.'
+    )
 
-    parser.add_option("-i", "--interface", dest="interface", help="Interface to change its MAC address")
-    parser.add_option("-m", "--mac", dest="new_mac", help="New MAC address")
+    parser.add_argument("-i", "--interface", dest="interface", help="Interface to change its MAC address")
+    parser.add_argument("-m", "--mac", dest="new_mac", help="New MAC address")
 
-    (options, arguments) = parser.parse_args()
+    arguments = parser.parse_args()
 
-    if not options.interface:
+    if not arguments.interface:
         parser.error("[-] Please specify an interface, use --help for more info.")
-    elif not options.new_mac:
+    elif not arguments.new_mac:
         parser.error("[-] Please specify a new mac, use --help for more info.")
 
-    return options
+    if not(re.match(r"^\w\w:\w\w:\w\w:\w\w:\w\w:\w\w$", str(arguments.new_mac))):
+        parser.error("[-] Please specify a correct new mac, using the format xx:xx:xx:xx:xx:xx")
+
+    # Checks if provided interface exists
+    try:
+        ifconfig_res = str(subprocess.check_output(["ifconfig", arguments.interface]))
+    except subprocess.CalledProcessError:
+        parser.error("[-]Please provide an existing interface. You can check them using 'ifconfig' command.")
+
+    return arguments
 
 
 def change_mac(interface, new_mac):
@@ -48,6 +61,6 @@ change_mac(options.interface, options.new_mac)
 
 current_mac = get_current_mac(options.interface)
 if current_mac == options.new_mac:
-    print("[+] MAC address succesfully changed to " + current_mac)
+    print("[+] MAC address successfully changed to " + current_mac)
 else:
     print("[-] MAC address was not changed")
