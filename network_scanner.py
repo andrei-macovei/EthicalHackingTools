@@ -3,12 +3,21 @@
 # pip3 install scapy-python3
 import scapy.all as scapy
 import argparse
-
+import re
 
 def get_arguments():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        prog='network_scanner',
+        description='Returns the IP and MAC addresses of all devices connected to a specified network.',
+        epilog='Part of EthicalHackingTools.'
+    )
     parser.add_argument("-t", "--target", dest="target", help="Target IP / IP range.")
     options = parser.parse_args()
+
+    if not options.target:
+        parser.error("[-] Please specify a target IP or IP range, use --help for more info.")
+    elif not re.match(r"^\d+.\d+.\d+.\d+(/\d{1,2})*$", str(options.target)):
+        parser.error("[-] Please specify a valid target, use --help for more info.")
 
     return options
 
