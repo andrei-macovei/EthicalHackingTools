@@ -5,6 +5,7 @@ import scapy.all as scapy
 import argparse
 import re
 
+
 def get_arguments():
     parser = argparse.ArgumentParser(
         prog='network_scanner',
@@ -16,7 +17,7 @@ def get_arguments():
 
     if not options.target:
         parser.error("[-] Please specify a target IP or IP range, use --help for more info.")
-    elif not re.match(r"^\d+.\d+.\d+.\d+(/\d{1,2})*$", str(options.target)):
+    elif not re.match(r"^\d+\.\d+\.\d+\.\d+(/\d{1,2})?$", str(options.target)):
         parser.error("[-] Please specify a valid target, use --help for more info.")
 
     return options
@@ -24,7 +25,7 @@ def get_arguments():
 
 def scan(ip):
     arp_request = scapy.ARP(pdst=ip)
-    # Create a ethernet frame with broadcast MAC address as destination
+    # Create an ethernet frame with broadcast MAC address as destination
     broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
     # Combine the arp and broadcast packets
     arp_request_broadcast = broadcast/arp_request
