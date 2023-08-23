@@ -12,7 +12,7 @@ def get_arguments():
         description='Returns the IP and MAC addresses of all devices connected to a specified network.',
         epilog='Part of EthicalHackingTools.'
     )
-    parser.add_argument("-t", "--target", dest="target", help="Target IP / IP range.")
+    parser.add_argument(dest="target", help="Target IP / IP range.")
     options = parser.parse_args()
 
     if not options.target:

