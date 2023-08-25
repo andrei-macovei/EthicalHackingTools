@@ -5,8 +5,7 @@ import time
 import argparse
 import re
 import sys
-
-# To enable IP forwarding for becoming MiM: echo 1 > /proc/sys/net/ipv4/ip_forward
+import subprocess
 
 
 def get_mac(ip):
@@ -69,6 +68,10 @@ def get_arguments():
 
 sent_packets_count = 0
 arguments = get_arguments()
+
+# To enable IP forwarding for becoming MiM: echo 1 > /proc/sys/net/ipv4/ip_forward
+subprocess.run(["echo 1 > /proc/sys/net/ipv4/ip_forward"], check=True, shell=True)
+
 try:
     while True:
         try:

