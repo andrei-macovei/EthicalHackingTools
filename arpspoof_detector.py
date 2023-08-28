@@ -4,6 +4,7 @@ import argparse
 import scapy.all as scapy
 import time
 
+
 def get_mac(ip):
     arp_request = scapy.ARP(pdst=ip)
     # Create an ethernet frame with broadcast MAC address as destination
